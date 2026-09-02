@@ -1,0 +1,104 @@
+* 鯱.py × Unagi.py コラボイベント in 豊橋
+
+- https://shachi-py.connpass.com/event/403190/
+* pygobjectでなにか
+
+** pygobjectとは？
+
+*** gobject + python = pygobject
+
+- gobjectのプロパティバインディングやシグナルをpythonクラスの文法で
+
+*** pygtkなどとは違う？
+
+- gobjectで作られているライブラリをそれぞれの言語向けにポーティングするのではない
+
+
+*** pygobjectのなにがいいのか
+
+- gobjectはC言語のライブラリ
+- Cでのオブジェクト指向はつらいのでpythonで書ける
+- Linuxデスクトッププログラミングで使うライブラリはgobjectで実装されている
+  - かなり語弊があるがここでのLinuxデスクトップとはgnomeだと思ってほしい
+
+** gobjectの特徴
+
+*** プロパティ
+
+*** シグナル
+
+*** プロパティバインディング
+
+
+** Linuxデスクトッププログラミング
+
+*** Linuxデスクトップ = だいたいGnomeのこと
+
+- とりあえずそういうスタンスで話す
+- KDE派の人はまあ世の中そういうものだと思って
+- freedesktopやXDGってなに？という話が必要か
+
+*** GUI
+
+- gtk4
+
+*** マルチメディア
+
+- gstreamer
+- poppler
+
+*** ユーザーサービス
+
+- systemd ユーザーセッション
+- d-bus セッション
+- polkit
+- desktop-portal
+- notification
+
+*** デスクトップシェル
+
+- gnome shell
+- waybar
+- noctalia shell
+- astal/ags
+
+** GUIアプリケーションを作る
+
+- gtk4
+- プロパティバインディング
+- アクション
+- ListModel
+  - なぜ普通の ~list~ ではだめなのか
+
+** D-Busサービスを作る
+*** GIOのD-Bus関連関数だけでは辛い
+
+- Cの場合はコード生成するツールがある
+- pythonはもっとスマートにできてほしい
+- dbus-fast
+  - デコレーターなどでクラス定義と一緒に宣言的な方法でD-Busインターフェイスを定義できる
+
+*** dbus-fastを使う
+
+- Helloを返すとかechoとか
+- xmlでのinterface定義はopenapi(swagger)みたいなもの
+
+** D-Busでない部分
+
+- コンポジターのIPCはD-Busでないことが多い？
+- mutterはD-Busかもしれない
+
+** 自分好みのデスクトップ
+
+*** タスクバー
+
+- アクティブワークスペース、ウィンドウ
+- システムトレイ
+- mpris
+- network-manager
+
+*** ランチャー
+
+- XDG Application Entry
+
+*** ノーティフィケーション
