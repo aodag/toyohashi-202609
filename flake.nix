@@ -20,6 +20,9 @@
             gtk4
             poppler
             gobject-introspection
+            typst
+            typstPackages.touying
+            tinymist
           ];
         };
       };
