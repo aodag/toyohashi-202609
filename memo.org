@@ -102,3 +102,20 @@
 - XDG Application Entry
 
 *** ノーティフィケーション
+
+* スライド構成
+
+*** Linuxデスクトップ
+
+- gnome
+- gobject
+
+*** マルチメディア
+
+- gstreamer
+- poppler
+
+*** pythonで書こう
+
+- pygobject
+- cairo
