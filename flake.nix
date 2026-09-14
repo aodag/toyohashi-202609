@@ -19,6 +19,7 @@
             ]))
             gtk4
             poppler
+            poppler_gi
             gobject-introspection
             typst
             typstPackages.cetz
