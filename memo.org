@@ -107,15 +107,43 @@
 
 *** Linuxデスクトップ
 
+**** Linuxデスクトップとはなにか
+
 - gnome
+
+**** なぜLinuxデスクトップか
+
+- suckless
+- Unix as IDE
+- UNIX哲学
+
+**** Linuxデスクトッププログラミング
+
 - gobject
+- gtk4
+- wayland
+- d-bus
 
 *** マルチメディア
+
+**** デスクトップに必要なもの
+
+**** マルチメディアのライブラリ
 
 - gstreamer
 - poppler
 
 *** pythonで書こう
 
+**** LinuxデスクトップアプリケーションをPythonで書く
+
 - pygobject
 - cairo
+
+**** pygobject以外の方法
+
+- tkinter
+- kivy
+- PyQt/PySide
+
+*** PythonでLinux用PDFリーダー
