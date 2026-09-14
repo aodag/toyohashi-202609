@@ -147,3 +147,12 @@
 - PyQt/PySide
 
 *** PythonでLinux用PDFリーダー
+
+* 参考文献
+
+- [[https://docs.gtk.org/][GTK Documentation]]
+- [[https://pygobject.gnome.org/][PyGObject]]
+- [[https://poppler.freedesktop.org/][Poppler]]
+- [[https://poppler.freedesktop.org/api/glib/][Poppler glib]]
+- [[https://www.freedesktop.org/wiki/][freedesktop.org]]
+- [[https://pyxdg.readthedocs.io/en/latest/index.html][PyXDG]]
