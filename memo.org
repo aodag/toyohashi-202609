@@ -130,6 +130,9 @@
 
 **** マルチメディアのライブラリ
 
+- gdk-pixbuf
+  - 退役予定らしい
+  - gdk textureなどを使うようにとのことである
 - gstreamer
 - poppler
 
@@ -139,12 +142,21 @@
 
 - pygobject
 - cairo
+- dbus-fast
 
 **** pygobject以外の方法
 
 - tkinter
 - kivy
 - PyQt/PySide
+
+**** asyncへの対応
+
+- experimental
+- そもそもそのevent policyというのがpython側でdeprecated
+- GTaskかGThread
+- GMainLoop, GContextの理解が難しいかも
+- コールバック、signalとかでなんとかしよう
 
 *** PythonでLinux用PDFリーダー
 
