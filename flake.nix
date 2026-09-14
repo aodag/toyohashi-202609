@@ -21,6 +21,8 @@
             poppler
             gobject-introspection
             typst
+            typstPackages.cetz
+            typstPackages.fletcher
             typstPackages.touying
             tinymist
           ];
