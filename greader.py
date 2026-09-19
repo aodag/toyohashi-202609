@@ -12,12 +12,14 @@ class GReaderModelItem(GObject.Object):
     page = GObject.Property(type=Poppler.Page, flags=GObject.ParamFlags.CONSTRUCT | GObject.ParamFlags.READWRITE)
     surface = None
     
-    def render(self, cr):
+    def render(self, cr, width, height):
+        w, h = self.page.get_size()
         if not self.surface:
-            w, h = self.page.get_size()
             self.surface = cairo.ImageSurface(cairo.Format.RGB24, int(w), int(h))
             c = cairo.Context(self.surface)
             self.page.render(c)
+        d = min(width / w, height / h)
+        cr.scale(d, d)
         cr.set_source_surface(self.surface, 0, 0)
         cr.paint()
 
@@ -47,10 +49,10 @@ class GReaderModel(GObject.Object):
         prev = max(0, selected - 1)
         self.selection.set_selected(prev)
 
-    def render(self, cr):
+    def render(self, cr, width, height):
         if not self.current_item:
             return
-        self.current_item.render(cr)
+        self.current_item.render(cr, width, height)
 
 
 class GReaderView(Gtk.DrawingArea):
@@ -60,7 +62,7 @@ class GReaderView(Gtk.DrawingArea):
         self.signal_group = GObject.SignalGroup.new(GReaderModel)
         self.signal_group.connect_data("notify", lambda *args: self.queue_draw(), None, GObject.ConnectFlags.DEFAULT)
         self.bind_property("model", self.signal_group, "target", flags=GObject.BindingFlags.SYNC_CREATE)
-        self.set_draw_func(lambda drawing_area, cr, width, height: self.model.render(cr))
+        self.set_draw_func(lambda drawing_area, cr, width, height: self.model.render(cr, width, height))
 
 
 class GReader(Gtk.Application):
