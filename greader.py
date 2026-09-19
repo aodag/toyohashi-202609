@@ -50,33 +50,27 @@ class GReaderView(Gtk.DrawingArea):
 
 
 class GReader(Gtk.Application):
+    model = GObject.Property(type=GReaderModel, flags=GObject.ParamFlags.READWRITE, default=GReaderModel())
+
+    def do_startup(self):
+        Gtk.Application.do_startup(self)
+        self.add_action_entries([
+            ("next", lambda *args: self.model.next()),
+            ("prev", lambda *args: self.model.prev()),
+            ("quit", lambda *args: self.quit()),
+        ])
+        for action, keys in [("app.next", ["j"]), ("app.prev", ["k"]), ("app.quit", ["q"])]:
+            self.set_accels_for_action(action, keys)
 
     def do_open(self, files, n_files, hint):
-        model = GReaderModel()
-        model.open(files)
-        self._show(model)
-
-    def _show(self, model):
-        win = Gtk.ApplicationWindow(application=self)
-        view = GReaderView(model=model)
-        next_action = Gio.SimpleAction.new("next", None)
-        next_action.connect("activate", lambda *args: model.next())
-        prev_action = Gio.SimpleAction.new("prev", None)
-        prev_action.connect("activate", lambda *args: model.prev())
-        quit_action = Gio.SimpleAction.new("quit", None)
-        quit_action.connect("activate", lambda *args: self.quit())
-        self.add_action(next_action)
-        self.add_action(prev_action)
-        self.add_action(quit_action)
-        self.set_accels_for_action("app.next", ["j"])
-        self.set_accels_for_action("app.prev", ["k"])
-        self.set_accels_for_action("app.quit", ["q"])
-        win.set_child(view)
-        win.present()
+        self.model.open(files)
+        self.activate()
 
     def do_activate(self):
-        model = GReaderModel()
-        self._show(model)
+        win = Gtk.ApplicationWindow(application=self)
+        view = GReaderView(model=self.model)
+        win.set_child(view)
+        win.present()
 
 
 def main():
