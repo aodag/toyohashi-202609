@@ -5,40 +5,67 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Poppler", "0.18")
 
 
-from gi.repository import Gio, GLib, Gtk, Poppler
+from gi.repository import Gio, GLib, GObject, Gtk, Poppler
 
 
 import argparse
 
 
-class GReader(Gtk.Application):
+class GReaderModel(GObject.Object):
+    current_page = GObject.Property(nick="current-page", type=Poppler.Page)
 
-    def do_open(self, files, n_files, hint):
-        self._show(files)
+    def do_constructed(self):
+        self.pages = Gio.ListStore.new(Poppler.Page)
+        self.selection = Gtk.SingleSelection.new(self.pages)
+        self.selection.bind_property("selected-item", self, "current-page")
 
-    def _show(self, files):
-        if not files:
-            print("no files")
-            self.quit()
-            return
-        pages = Gio.ListStore.new(Poppler.Page)
+    def open(self, files):
         for file in files:
             doc = Poppler.Document.new_from_gfile(file, None)
             for i in range(doc.get_n_pages()):
                 page = doc.get_page(i)
-                pages.append(page)
-        if not pages:
-            print("no pages")
-            sys.exit(1)
-        selection = Gtk.SingleSelection.new(pages)
+                self.pages.append(page)
+
+    def next(self):
+        selected = self.selection.get_selected()
+        next = min(selected + 1, self.selection.get_n_items() - 1)
+        self.selection.set_selected(next)
+
+    def prev(self):
+        selected = self.selection.get_selected()
+        prev = max(0, selected - 1)
+        self.selection.set_selected(prev)
+
+    def render(self, cr):
+        if not self.current_page:
+            return
+        self.current_page.render(cr)
+
+
+class GReaderView(Gtk.DrawingArea):
+    model = GObject.Property(type=GReaderModel, flags=GObject.ParamFlags.CONSTRUCT | GObject.ParamFlags.READWRITE)
+
+    def do_constructed(self):
+        self.signal_group = GObject.SignalGroup.new(GReaderModel)
+        self.signal_group.connect_data("notify", lambda *args: self.queue_draw(), None, GObject.ConnectFlags.DEFAULT)
+        self.bind_property("model", self.signal_group, "target", flags=GObject.BindingFlags.SYNC_CREATE)
+        self.set_draw_func(lambda drawing_area, cr, width, height: self.model.render(cr))
+
+
+class GReader(Gtk.Application):
+
+    def do_open(self, files, n_files, hint):
+        model = GReaderModel()
+        model.open(files)
+        self._show(model)
+
+    def _show(self, model):
         win = Gtk.ApplicationWindow(application=self)
-        view = Gtk.DrawingArea()
-        view.set_draw_func(lambda drawing_area, cr, width, height: selection.get_selected_item().render(cr))
-        selection.connect("selection-changed", lambda *args: view.queue_draw())
+        view = GReaderView(model=model)
         next_action = Gio.SimpleAction.new("next", None)
-        next_action.connect("activate", lambda *args: selection.set_selected(min(selection.get_selected() + 1, selection.get_n_items() - 1)))
+        next_action.connect("activate", lambda *args: model.next())
         prev_action = Gio.SimpleAction.new("prev", None)
-        prev_action.connect("activate", lambda *args: selection.set_selected(max(0, selection.get_selected() - 1)))
+        prev_action.connect("activate", lambda *args: model.prev())
         quit_action = Gio.SimpleAction.new("quit", None)
         quit_action.connect("activate", lambda *args: self.quit())
         self.add_action(next_action)
@@ -51,7 +78,8 @@ class GReader(Gtk.Application):
         win.present()
 
     def do_activate(self):
-        self._show([])
+        model = GReaderModel()
+        self._show(model)
 
 
 def main():
