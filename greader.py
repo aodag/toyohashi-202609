@@ -4,24 +4,38 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Poppler", "0.18")
 
-
+import cairo
 from gi.repository import Gio, GLib, GObject, Gtk, Poppler
+
+class GReaderModelItem(GObject.Object):
+    filename = GObject.Property(type=str, flags=GObject.ParamFlags.CONSTRUCT | GObject.ParamFlags.READWRITE)
+    page = GObject.Property(type=Poppler.Page, flags=GObject.ParamFlags.CONSTRUCT | GObject.ParamFlags.READWRITE)
+    surface = None
+    
+    def render(self, cr):
+        if not self.surface:
+            w, h = self.page.get_size()
+            self.surface = cairo.ImageSurface(cairo.Format.RGB24, int(w), int(h))
+            c = cairo.Context(self.surface)
+            self.page.render(c)
+        cr.set_source_surface(self.surface, 0, 0)
+        cr.paint()
 
 
 class GReaderModel(GObject.Object):
-    current_page = GObject.Property(nick="current-page", type=Poppler.Page)
+    current_item = GObject.Property(nick="current-item", type=GReaderModelItem)
 
     def do_constructed(self):
-        self.pages = Gio.ListStore.new(Poppler.Page)
+        self.pages = Gio.ListStore.new(GReaderModelItem)
         self.selection = Gtk.SingleSelection.new(self.pages)
-        self.selection.bind_property("selected-item", self, "current-page")
+        self.selection.bind_property("selected-item", self, "current-item")
 
     def open(self, files):
         for file in files:
             doc = Poppler.Document.new_from_gfile(file, None)
             for i in range(doc.get_n_pages()):
                 page = doc.get_page(i)
-                self.pages.append(page)
+                self.pages.append(GReaderModelItem(page=page, filename=file.get_path()))
 
     def next(self):
         selected = self.selection.get_selected()
@@ -34,9 +48,9 @@ class GReaderModel(GObject.Object):
         self.selection.set_selected(prev)
 
     def render(self, cr):
-        if not self.current_page:
+        if not self.current_item:
             return
-        self.current_page.render(cr)
+        self.current_item.render(cr)
 
 
 class GReaderView(Gtk.DrawingArea):
