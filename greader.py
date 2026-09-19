@@ -8,9 +8,6 @@ gi.require_version("Poppler", "0.18")
 from gi.repository import Gio, GLib, GObject, Gtk, Poppler
 
 
-import argparse
-
-
 class GReaderModel(GObject.Object):
     current_page = GObject.Property(nick="current-page", type=Poppler.Page)
 
