@@ -158,7 +158,56 @@
 - GMainLoop, GContextの理解が難しいかも
 - コールバック、signalとかでなんとかしよう
 
-*** PythonでLinux用PDFリーダー
+*** PDFリーダー
+
+実際にPyGObjectを使う例としてPDFリーダーを作る。
+Popplerもgiを提供している。
+Popplerはページの内容をcairo surfaceとしてレンダリングする。
+GtkではDrawingAreaを使ってcairo surfaceを画面表示できる。
+
+
+**** cairo surface
+
+- cairoはgiを提供していないがPyGObjectではpycairoを特別扱いしてくれる
+- いい感じの表示になるようサイズ計算
+  - aspect ratio
+- cairo contextでscale指定
+- Image Surface をcairo contextのsourceに指定
+- cairo contextにpaintで反映
+
+**** poppler
+
+- ~Poppler.Document~ でPDFファイルをロードする
+- documentからページごとに ~Poppler.Page~ オブジェクトを取得する
+- レンダリング先のImage Surfaceを作る
+  - キャッシュするため
+- pageのrenderメソッドでページ内容をレンダリング
+
+**** Gtk.DrawingArea
+
+- drwaing functionでcairo contextを使った描画方法を指定できる
+- Gtk.Widgetのサブクラスなのでqueue_drawで再描画を要求できる
+- ページ変更シグナルに対応してqueue_drawする
+
+**** PyGObjectでのモデル
+
+- GObject.Objectを継承する
+- プロパティやシグナルを定義する
+  - pageプロパティ
+  - 自動的に ~notify::page~ シグナルも実装される
+- メソッド
+  - nextやprevなどのページ移動メソッド
+  - renderメソッド
+    - これはモデルでやるべきではなかったかも
+
+**** アプリケーションアクション
+
+- GLib.SimpleAction
+  - activateでモデルのnextやprevを呼ぶ
+- add_action_entries
+  - Gtk.Application(ActionMapを継承している)にアクションを登録
+- set_accels_for_action
+  - ショートカットキー（アクセルキー）をアクションに紐づけ
 
 * 参考文献
 
