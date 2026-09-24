@@ -3,12 +3,163 @@
 
 #show: simple-theme.with(aspect-ratio: "16-9")
 
-= Title
+= PythonでLinuxデスクトッププログラミング
 
-== First Slide
+= Linuxデスクトップ
 
-Hello, Touying!
+Linuxの個人環境というとコンソールでコマンドラインシェルを使うをイメージすることが多い。
+UNIX哲学でUNIXコマンドをパイプでつないで活用する話も有名。
+WSLはGUIも提供するようになったが基本的にはコマンドラインシェルを提供するものだった。
+GnomeやKDEといったLinuxデスクトップはGUIだけでなくユーザーセッションや各種サービスを提供している。
+Linuxデスクトップで画像や動画といったマルチメディアも取り扱える。
 
-#pause
+== Linuxでデスクトップ環境を使おう
 
-Hello, Typst!
+- Linuxのイメージ
+  - suckless
+  - Unix as IDE
+  - UNIX哲学
+  - WSL
+  - sshの先でtmuxが動いてるやつ
+- デスクトップ環境は必要でしょう
+  - 画像や動画も取り扱う時代
+  - 外部デバイス
+
+== Linuxデスクトップ
+
+- だいたいgnomeというもののことだと思ってください
+  - それ以外を使う人はわかってる人でしょ
+- デスクトップを支えるものたち
+  - gvfs
+  - secret manager
+  - notification
+  - タスクバー
+  - アプリケーションランチャー
+
+== Linuxデスクトッププログラミングとgobject
+
+- gnome関連のコンポーネントはgobjectで作られている
+  - gtk4とか
+- C言語のライブラリ
+  - オブジェクト指向を実現するもの
+  - クラス、インターフェイス
+  - プロパティ
+  - シグナル
+  - プロパティバインディング
+
+== マルチメディアのライブラリ
+
+- gdk-pixbuf
+  - 画像処理のライブラリ
+  - 退役予定らしい
+  - gdk textureなどを使うようにとのことである
+  - pythonでやるときはPillow使うだけなので気にしない
+- gstreamer
+  - 動画や音声の再生録画など
+  - ミキシングやリサンプリングなどのパイプライン
+- poppler
+  - PDFのライブラリ
+  - 旧xpdf
+  - glibラッパーがありgiを提供している
+
+= pythonで書こう
+
+GObjectはC言語でオブジェクト指向を実現しているがマクロやキャストが多く快適とは言い難い。
+giによって各種言語へのバインディグが提供される。
+PyGObjectはGObjectのオブジェクト指向をPythonの文法に適合させている。
+PyGObjectを使うと快適にLinuxデスクトップアプリケーションを実装できる。
+
+== GObject辛い
+
+- C言語でオブジェクト指向
+- マクロやキャストの嵐
+- メソッドは名前空間からフルで全部書く
+- 文字列結合程度でもfreeとか気にしないといけない
+- エラー処理はGErrorのポインタをポインタで渡す
+- やってられない
+
+== GObject Introspection
+
+- gobjectで実装したライブラリを様々な言語から使う
+
+== PyGObject
+
+- GObjectのオブジェクト指向機能をPython文法で書ける
+- クラス定義はそのまま
+- プロパティやシグナルはデコレーターなどで実装
+- エラー処理も例外処理に変換される
+
+== LinuxデスクトップアプリケーションをPythonで書く
+
+- pygobject
+- cairo
+- dbus-fast
+
+= PDFリーダーをつくる
+
+実際にPyGObjectを使う例としてPDFリーダーを作る。
+Popplerもgiを提供している。
+Popplerはページの内容をcairo surfaceとしてレンダリングする。
+GtkではDrawingAreaを使ってcairo surfaceを画面表示できる。
+
+
+== cairo surface
+
+- cairoはgiを提供していないがPyGObjectではpycairoを特別扱いしてくれる
+- いい感じの表示になるようサイズ計算
+  - aspect ratio
+- cairo contextでscale指定
+- Image Surface をcairo contextのsourceに指定
+- cairo contextにpaintで反映
+
+== poppler
+
+- ~Poppler.Document~ でPDFファイルをロードする
+- documentからページごとに ~Poppler.Page~ オブジェクトを取得する
+- レンダリング先のImage Surfaceを作る
+  - キャッシュするため
+- pageのrenderメソッドでページ内容をレンダリング
+
+== Gtk.DrawingArea
+
+- drwaing functionでcairo contextを使った描画方法を指定できる
+- Gtk.Widgetのサブクラスなのでqueue_drawで再描画を要求できる
+- ページ変更シグナルに対応してqueue_drawする
+
+== ListModel
+
+- pythonのlistではなくListModel (ListStore) を使う
+- アイテム追加削除などでシグナルを発生
+- SelectionModelやFilterModel、SortModelと組み合わせる
+- ListViewなどに渡す
+
+== PyGObjectでのモデル
+
+- GObject.Objectを継承する
+- プロパティやシグナルを定義する
+  - pageプロパティ
+  - 自動的に ~notify::page~ シグナルも実装される
+- メソッド
+  - nextやprevなどのページ移動メソッド
+  - renderメソッド
+    - これはモデルでやるべきではなかったかも
+
+== アプリケーションアクション
+
+- GLib.SimpleAction
+  - activateでモデルのnextやprevを呼ぶ
+- add_action_entries
+  - Gtk.Application(ActionMapを継承している)にアクションを登録
+- set_accels_for_action
+  - ショートカットキー（アクセルキー）をアクションに紐づけ
+
+
+== 参考文献
+
+- [[https://docs.gtk.org/][GTK Documentation]]
+- [[https://gi.readthedocs.io/en/latest/][GObject Introspection]]
+- [[https://pygobject.gnome.org/][PyGObject]]
+- [[https://poppler.freedesktop.org/][Poppler]]
+- [[https://poppler.freedesktop.org/api/glib/][Poppler glib]]
+- [[https://www.freedesktop.org/wiki/][freedesktop.org]]
+- [[https://pyxdg.readthedocs.io/en/latest/index.html][PyXDG]]

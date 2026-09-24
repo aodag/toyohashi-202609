@@ -113,7 +113,7 @@ WSLはGUIも提供するようになったが基本的にはコマンドライ�
 GnomeやKDEといったLinuxデスクトップはGUIだけでなくユーザーセッションや各種サービスを提供している。
 Linuxデスクトップで画像や動画といったマルチメディアも取り扱える。
 
-*** Linux
+*** Linuxでデスクトップ環境を使おう
 
 - Linuxのイメージ
   - suckless
@@ -121,25 +121,31 @@ Linuxデスクトップで画像や動画といったマルチメディアも取
   - UNIX哲学
   - WSL
   - sshの先でtmuxが動いてるやつ
-- デスクトップは必要でしょう
+- デスクトップ環境は必要でしょう
   - 画像や動画も取り扱う時代
   - 外部デバイス
 
 *** Linuxデスクトップ
 
-- gnome
-- gvfs
-- secret manager
-- notification
-- タスクバー
-- ランチャー
+- だいたいgnomeというもののことだと思ってください
+  - それ以外を使う人はわかってる人でしょ
+- デスクトップを支えるものたち
+  - gvfs
+  - secret manager
+  - notification
+  - タスクバー
+  - アプリケーションランチャー
 
-*** Linuxデスクトッププログラミング
+*** Linuxデスクトッププログラミングとgobject
 
-- gobject
-- gtk4
-- wayland
-- d-bus
+- gnome関連のコンポーネントはgobjectで作られている
+  - gtk4とか
+- C言語のライブラリ
+  - オブジェクト指向を実現するもの
+  - クラス、インターフェイス
+  - プロパティ
+  - シグナル
+  - プロパティバインディング
 
 *** マルチメディアのライブラリ
 
@@ -171,6 +177,10 @@ PyGObjectを使うと快適にLinuxデスクトップアプリケーションを
 - 文字列結合程度でもfreeとか気にしないといけない
 - エラー処理はGErrorのポインタをポインタで渡す
 - やってられない
+
+*** GObject Introspection
+
+- gobjectで実装したライブラリを様々な言語から使う
 
 *** PyGObject
 
@@ -216,6 +226,13 @@ GtkではDrawingAreaを使ってcairo surfaceを画面表示できる。
 - Gtk.Widgetのサブクラスなのでqueue_drawで再描画を要求できる
 - ページ変更シグナルに対応してqueue_drawする
 
+*** ListModel
+
+- pythonのlistではなくListModel (ListStore) を使う
+- アイテム追加削除などでシグナルを発生
+- SelectionModelやFilterModel、SortModelと組み合わせる
+- ListViewなどに渡す
+
 *** PyGObjectでのモデル
 
 - GObject.Objectを継承する
@@ -236,43 +253,11 @@ GtkではDrawingAreaを使ってcairo surfaceを画面表示できる。
 - set_accels_for_action
   - ショートカットキー（アクセルキー）をアクションに紐づけ
 
-** ユーザーセッションサービス
-
-マルチメディアを扱うアプリケーションだけでなくデスクトップではユーザーセッションサービスを提供するための仕組みがある。
-D-BusサービスはGnome/KDEの双方で採用されているデファクトスタンダード。
-サービスレジストリを持ちイベントやプロパティを取り扱う仕組み。
-pythonではPyGObjectから利用できるがさらにそれをラップしたdbus-fastを使うとwebアプリケーションのようにD-Busサービスを実装できる。
-
-*** D-Bus
-
-*** systemd ユーザーセッションとD-Busアクティベーション
-
-*** dbus-fast
-
-*** TODO なんらかの実装例
-
-- AIでも呼ぶか
-
-** こぼれ話
-
-*** pygobject以外の方法
-
-- tkinter
-- kivy
-- PyQt/PySide
-
-*** asyncへの対応
-
-- experimental
-- そもそもそのevent policyというのがpython側でdeprecated
-- GTaskかGThread
-- GMainLoop, GContextの理解が難しいかも
-- コールバック、signalとかでなんとかしよう
-
 
 * 参考文献
 
 - [[https://docs.gtk.org/][GTK Documentation]]
+- [[https://gi.readthedocs.io/en/latest/][GObject Introspection]]
 - [[https://pygobject.gnome.org/][PyGObject]]
 - [[https://poppler.freedesktop.org/][Poppler]]
 - [[https://poppler.freedesktop.org/api/glib/][Poppler glib]]
