@@ -15,9 +15,12 @@ class GReaderModelItem(GObject.Object):
     def render(self, cr, width, height):
         w, h = self.page.get_size()
         if not self.surface:
-            self.surface = cairo.ImageSurface(cairo.Format.RGB24, int(w), int(h))
+            self.surface = cairo.ImageSurface(cairo.Format.ARGB32, int(w) * 5, int(h) * 5)
             c = cairo.Context(self.surface)
             self.page.render(c)
+        cr.set_source_rgb(0.5, 0.5, 0.6)
+        cr.rectangle(0, 0, width, height)
+        cr.fill()
         d = min(width / w, height / h)
         cr.scale(d, d)
         cr.set_source_surface(self.surface, 0, 0)
